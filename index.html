@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Status Pembayaran Kas - Pengurus HMTGM</title>
+  <style>
+    body {
+      font-family: 'Times New Roman', serif;
+      padding: 20px;
+      background-color: #f9f9f9;
+      margin: auto;
+      max-width: 480px;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      font-size: 18px;
+      text-align: center;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    select, button {
+      display: block;
+      font-size: 14px;
+      width: 100%;
+      padding: 6px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 20px;
+      background-color: #d9534f;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #c9302c;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 13px;
+    }
+    th, td {
+      border: 1px solid #999;
+      padding: 6px;
+      text-align: center;
+    }
+    th {
+      background-color: #eee;
+    }
+    .watermark {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .watermark span {
+      display: inline-block;
+      font-size: 9px;
+      font-family: 'Times New Roman', serif;
+      content: "© KABIRO KEUANGAN HMTGM 2025";
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Status Pembayaran Kas<br>Pengurus HMTGM</h1>
+
+    <label for="divisi">DIVISI</label>
+    <select id="divisi">
+      <option value="">-- Pilih Divisi --</option>
+    </select>
+
+    <label for="nama">NAMA</label>
+    <select id="nama">
+      <option value="">-- Pilih Nama --</option>
+    </select>
+
+    <button id="cekBtn">CEK STATUS KAS</button>
+
+    <div id="output"></div>
+    <div class="watermark">
+      <span>© KABIRO KEUANGAN HMTGM 2025</span>
+    </div>
+  </div>
+
+  <script>
+    const divisiMap = {
+      "KETUA DAN WAKIL KETUA": ["Muammar Hilmy Abdullah Faqih", "Rifqi Aryataka Budihardjo"],
+      "SEKRETARIS UMUM": ["Indy Alin Nabila"],
+      "BIRO KESEKRETARIATAN": ["Nabila Alya Zahra", "Louisa Cristania Ginting", "Linda Putri Nur Widyaningrum", "Eka Dwi Purnamasari", "Yudyanitha Ageng Risgianti S"],
+      "BIRO KEUANGAN": ["Leoni Fransiska", "Salsabila Rindu Kanaya", "Raisha Az Zahra", "Jessica Tsuileits Darojat", "Anggita Putri Marsela", "Rinovia Rudi Ardian"],
+      "ADVOKASI": ["Garuda Damar Manunggal", "Gusti Bagus Rama Azzahra A", "Reinaldy Octavian Hakeem", "Satrio Aji Diastama Putra", "Naufal Adhi Riswanto", "Raihan Ahmed Jaziraq", "Dinara Safira", "Aldric Ghani Ardianto", "Yuli Wisnu Anggara"],
+      "EKSTERNAL": ["Xenia Putri Damayanti", "Ananda Raditya Djoko P", "Reyhan Alan Ray", "Muhammad Luthfi Albukhori", "Feronika Idola Silaban", "Gabriella Ruthnauli Sibuea", "Muhammad Fauzi Nur Arifin", "Raihan Abiyu Rachman", "Rayhan Dwinata Putra F"],
+      "EKONOMI": ["Dendi Duandiarta", "Rosalina Anggun Kusuma", "Anastasia Riska Suryani", "Nafisa Sahid", "Fadhillah Ramadhani", "Raan Akhsan", "Nabeel Aufal", "Farrel Fritzi Junior"],
+      "LINGKUNGAN SOSIAL DAN MASYARAKAT": ["Putri Nur Fadila", "Fahru Handian Suyuti", "Adrian Arya Pramana", "Amelia Sabarena Ainul F", "Adinda Alifah Saputi", "Made Selfianti", "Bagus Adi Prasetyo", "Belvana Amorita Azzah"],
+      "MEDIA DAN INFORMASI": ["Nur Ilafi Queen Khadijah", "Mashka Leona Malya Syiffa", "Ermi Rahmawati Putri", "Fadhila Adya Az Zahra", "Mufid Nur Hakim", "Muhammad Ferry Arianto"],
+      "MINAT DAN BAKAT": ["Miftah Ruiansyah Putra", "Muhammad Ridwan Sholikhin", "Felicita Petronela Dirgantari Uma", "Dewangga Putra Lasmadi", "Muhammad Zia-addin Fahmie", "Jona Andrian Sihombing", "Shannia Feby Cantika", "Muhammad Rasya Al Maliki", "Muhammad Rasyid Ilham"],
+      "PENELITIAN DAN PENGEMBANGAN": ["Riva Nur Rohmatulloh", "Yuliana Berlianti", "Tota Lolita Munthe", "Erlin Oktaviana Saputri", "Aditia Ega Putra Ramadan", "Nirina Fitria Fauziah", "Arsyad Fidar Zabran"],
+      "PENGEMBANGAN SUMBER DAYA MAHASISWA": ["ARDIANA LESTARI", "Izza Anggitha Aryanawa", "Youvelia Defita br Purba", "Dewi Tyas Utami", "Taufik Nur Primundianto", "Anida Almira Rahma Sari", "Diva Shafira Putri Haryadi", "Ghoida' Atika Annisatuzzahro'"]
+    };
+
+    const divisiSel = document.getElementById("divisi");
+    const namaSel = document.getElementById("nama");
+    const outputDiv = document.getElementById("output");
+
+    Object.keys(divisiMap).forEach(div => {
+      let opt = document.createElement("option");
+      opt.value = div;
+      opt.textContent = div;
+      divisiSel.appendChild(opt);
+    });
+
+    divisiSel.onchange = () => {
+      const divisi = divisiSel.value;
+      namaSel.innerHTML = '<option value="">-- Pilih Nama --</option>';
+      if (divisiMap[divisi]) {
+        divisiMap[divisi].forEach(nama => {
+          let opt = document.createElement("option");
+          opt.value = nama;
+          opt.textContent = nama;
+          namaSel.appendChild(opt);
+        });
+      }
+    };
+
+    document.getElementById("cekBtn").onclick = async () => {
+      const nama = namaSel.value;
+      if (!nama) {
+        outputDiv.innerHTML = '<p>Silakan pilih nama terlebih dahulu.</p>';
+        return;
+      }
+
+      outputDiv.innerHTML = '<p>Memuat data...</p>';
+
+      const sheetId = '16H9EjpTVsnfQhL8N1KtlyabTai6-ac6UEhyshBM8Hgs';
+      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+
+      try {
+        const response = await fetch(url);
+        const text = await response.text();
+        const json = JSON.parse(text.substring(47).slice(0, -2));
+
+        const rows = json.table.rows;
+        const periodeLabels = rows[1].c.map(cell => cell ? cell.v : "");
+        const nameRowIndex = rows.findIndex(row => row.c.some(cell => cell && cell.v && cell.v.toString().trim() === nama.trim()));
+        const dataRow = rows[nameRowIndex];
+
+        let html = '<table><tr><th>Periode</th><th>Status</th><th>Denda (Rp)</th></tr>';
+        const today = new Date();
+
+        for (let i = 2; i < periodeLabels.length; i++) {
+          const status = dataRow?.c[i]?.v || "-";
+          const periodeText = periodeLabels[i] || "";
+          let denda = "-";
+
+          const match = periodeText.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})\s*[–—-]\s*(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+
+          if (match) {
+            const endDay = parseInt(match[4]);
+            const endMonth = parseInt(match[5]) - 1;
+            const endYear = parseInt(match[6].length === 2 ? '20' + match[6] : match[6]);
+            const penaltyStartDate = new Date(endYear, endMonth, endDay + 1);
+
+            const diffMs = today - penaltyStartDate;
+            const overdueDays = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
+
+            if (status === '❌') {
+              denda = overdueDays > 0 ? overdueDays * 500 : 0;
+            } else if (status === '✔️') {
+              denda = 0;
+            } else {
+              denda = overdueDays > 0 ? overdueDays * 500 : 0;
+            }
+          }
+
+          html += `<tr><td>${periodeText}</td><td>${status}</td><td>${denda}</td></tr>`;
+        }
+
+        html += '</table>';
+        outputDiv.innerHTML = html;
+
+      } catch (err) {
+        console.error(err);
+        outputDiv.innerHTML = '<p>Gagal memuat data. Pastikan spreadsheet dapat diakses publik.</p>';
+      }
+    };
+  </script>
+</body>
+</html>
